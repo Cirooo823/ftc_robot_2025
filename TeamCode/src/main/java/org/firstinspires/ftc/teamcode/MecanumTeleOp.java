@@ -14,10 +14,7 @@ public class MecanumTeleOp extends OpMode {
     double LM_Ticks; //Find ticks of linear motion motor
     double target;
 
-    public DcMotorEx right_b;
-    public DcMotorEx left_f;
-    public DcMotorEx right_f;
-    public DcMotorEx left_b;
+
 
 
 
@@ -27,17 +24,6 @@ public class MecanumTeleOp extends OpMode {
     public void init() {
 
         robot.init(hardwareMap);
-
-        left_f = hardwareMap.get(DcMotorEx.class, "left_front");
-        right_f = hardwareMap.get(DcMotorEx.class, "right_front");
-        left_b = hardwareMap.get(DcMotorEx.class, "left_back");
-        right_b = hardwareMap.get(DcMotorEx.class, "right_back");
-
-        right_f.setDirection(DcMotorSimple.Direction.REVERSE);
-        right_b.setDirection(DcMotorSimple.Direction.REVERSE);
-
-
-
     }
     //Code to run REPEATEDLY after the driver hits INIT
     @Override
@@ -59,19 +45,7 @@ public class MecanumTeleOp extends OpMode {
     @Override
     public void loop() {
 
-        double x = -gamepad1.right_stick_x;
-        double y = -gamepad1.left_stick_y;
-        double rx = -gamepad1.left_stick_x;
-
-
-        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-
-        //Hardware needs to change motors for increased speed.
-
-        right_f.setPower( (y + x + rx) / denominator);
-        left_b.setPower( (y - x + rx) / denominator);
-        left_f.setPower( (y - x - rx) / denominator);
-        right_b.setPower( (y + x - rx) / denominator);
+        robot.driveTrain.drive(gamepad1);
 
 
         /*
