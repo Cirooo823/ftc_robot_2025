@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class LinearClaw {
@@ -18,6 +19,7 @@ public class LinearClaw {
         linear_claw.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         linear_claw.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        linear_claw.setDirection(DcMotorSimple.Direction.REVERSE);
 
     }
 
