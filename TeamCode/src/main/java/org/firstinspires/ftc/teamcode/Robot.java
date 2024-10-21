@@ -7,8 +7,7 @@ public class Robot {
 
     HardwareMap hardwareMap;
     //MecanumDriveTrain driveTrain = new MecanumDriveTrain();
-    LinearVerticalLeft linear_L = new LinearVerticalLeft();
-    LinearVerticalRight linear_R = new LinearVerticalRight();
+    Lift lift = new Lift();
     LinearClaw linear_C = new LinearClaw();
     //ClawLeft left_claw = new ClawLeft();
 
@@ -20,8 +19,7 @@ public class Robot {
     public void init(HardwareMap ahwMap) {
         hardwareMap = ahwMap;
         //driveTrain.init(hardwareMap);
-        linear_L.init(hardwareMap);
-        linear_R.init(hardwareMap);
+        lift.init(hardwareMap);
         linear_C.init(hardwareMap);
         //dT.init(hardwareMap);
 

@@ -94,8 +94,15 @@ public class MecanumTeleOp extends OpMode {
     public void init_loop() {
 
 
-        telemetry.addData("linear_claw", robot.linear_C.linear_claw.getCurrentPosition());
+        //telemetry.addData("linear_claw", robot.linear_C.linear_claw.getCurrentPosition());
         telemetry.addData("left_servo_position", left_servo.getPosition());
+
+        telemetry.addData("left_front", left_f.getCurrentPosition());
+        telemetry.addData("right_front", right_f.getCurrentPosition());
+        telemetry.addData("left_back", left_b.getCurrentPosition());
+        telemetry.addData("right_back", right_b.getCurrentPosition());
+
+
         telemetry.update();
 
     }
@@ -158,11 +165,27 @@ public class MecanumTeleOp extends OpMode {
        */
 
 
-        robot.linear_L.linear_motion_left.setPower(gamepad2.left_stick_y);
-        robot.linear_R.linear_motion_right.setPower(gamepad2.left_stick_y);
+        robot.lift.setVelocities(-gamepad2.left_stick_y * 0.50 * robot.lift.MAX_VEL);
+        robot.lift.doTelemetry(telemetry);
+        telemetry.addData("Input val", -gamepad2.left_stick_y * 0.50 * robot.lift.MAX_VEL);
+
+        robot.linear_C.linear_claw_Telemetry(telemetry);
+        telemetry.update();
+
+        double input_vel = gamepad2.right_stick_y * 0.75 * robot.linear_C.MAX_VEL;
+
+        if (input_vel < 0 && robot.linear_C.linear_claw.getCurrentPosition() >= robot.linear_C.OUTER_BOUND
+        ||  input_vel > 0 && robot.linear_C.linear_claw.getCurrentPosition() <= robot.linear_C.INNER_BOUND){
+            robot.linear_C.linear_claw.setVelocity(input_vel);
+        }
+        else{
+            robot.linear_C.linear_claw.setVelocity(0);
+        }
 
 
-        robot.linear_C.linear_claw.setPower(gamepad2.right_stick_y);
+
+        robot.lift.left_slide.setPower(gamepad2.left_stick_y);
+        robot.lift.right_slide.setPower(gamepad2.left_stick_y);
 
 
        if (gamepad2.left_bumper){
@@ -293,7 +316,7 @@ public class MecanumTeleOp extends OpMode {
         robot.linear_C.linear_claw.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         target = ticks/turnage;
         robot.linear_C.linear_claw.setTargetPosition((int) target);
-        robot.linear_C.linear_claw.setPower(-power);
+        robot.linear_C.linear_claw.setPower(power);
         robot.linear_C.linear_claw.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
