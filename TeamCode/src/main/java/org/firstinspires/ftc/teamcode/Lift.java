@@ -15,6 +15,9 @@ public class Lift {
     public final double TICKS_PER_REV = 537.7;
     public final double MAX_VEL = 312/60 * TICKS_PER_REV;
 
+    public final int MAX_BOUNDS = 3200;
+    public final int STARTING_BOUNDS = 0;
+
     HardwareMap hardwareMap;
 
     public void init(HardwareMap ahwMap) {
@@ -22,18 +25,17 @@ public class Lift {
         left_slide = hardwareMap.get(DcMotorEx.class, "linear_motion_left");
         right_slide = hardwareMap.get(DcMotorEx.class, "linear_motion_right");
 
+        left_slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right_slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         left_slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         right_slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        left_slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right_slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         left_slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         right_slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         right_slide.setDirection(DcMotorEx.Direction.REVERSE);
-        left_slide.setDirection(DcMotorEx.Direction.REVERSE);
+        //left_slide.setDirection(DcMotorEx.Direction.REVERSE);
 
     }
 
@@ -46,13 +48,15 @@ public class Lift {
 
         telemetry.addData("Right Slide Vel", right_slide.getVelocity());
         telemetry.addData("Left Slide Vel", left_slide.getVelocity());
-
     }
+
+//    public void loop(){
+//
+//    }
 
     public void setVelocities(double velocity){
-        left_slide.setVelocity(velocity * 0.5);
+        left_slide.setVelocity(velocity);
         right_slide.setVelocity(velocity);
     }
-
 
 }

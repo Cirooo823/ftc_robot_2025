@@ -29,6 +29,7 @@ public class MecanumTeleOp extends OpMode {
     public CRServo intake_servo;
     public Servo claw_rot;
 
+    public Servo claw_yaw;
     public Servo specimen_grabber;
 
 
@@ -51,6 +52,19 @@ public class MecanumTeleOp extends OpMode {
     private static final int SPECIMEN_DELAY_MS = 1000;
     private boolean rightBumperTaskInProgress = false;
     private int rightBumperTaskStep = 0; // Track the step in the bumper task
+
+    public int claw_yaw_pressed = 0;
+
+    private static final double SERVO_INCREMENT = 0.05;
+    private static final double MIN_SERVO_POSITION = 0.0;
+    private static final double MAX_SERVO_POSITION = 1.0;
+
+    private boolean rightBumperPressedLast = false;
+    private boolean leftBumperPressedLast = false;
+
+
+
+    public double new_pos = 0.02 * claw_yaw_pressed;
 
     private ElapsedTime rightBumperTimer = new ElapsedTime();
 
@@ -79,12 +93,14 @@ public class MecanumTeleOp extends OpMode {
         intake_servo = hardwareMap.get(CRServo.class, "intake_servo");
         claw_rot = hardwareMap.get(Servo.class, "intake_lift");
         specimen_grabber = hardwareMap.get(Servo.class, "specimen_grabber");
+        claw_yaw = hardwareMap.get(Servo.class, "claw_yaw");
 
 
 
         claw_rot.setPosition(1);
         left_servo.setPosition(0.015);
         specimen_grabber.setPosition(0.5);
+        claw_yaw.setPosition(0.2);
 
 
     }
@@ -101,6 +117,7 @@ public class MecanumTeleOp extends OpMode {
         telemetry.addData("right_front", right_f.getCurrentPosition());
         telemetry.addData("left_back", left_b.getCurrentPosition());
         telemetry.addData("right_back", right_b.getCurrentPosition());
+
 
 
         telemetry.update();
@@ -137,61 +154,64 @@ public class MecanumTeleOp extends OpMode {
         left_b.setPower(((y - x + rx) / denominator) * drivePowerScale);
         left_f.setPower(((y - x - rx) / denominator) * drivePowerScale);
         right_b.setPower(((y + x - rx) / denominator) * drivePowerScale);
-
-
-
-       /*
-       double[] driveVelocities =
-               robot.driveTrain.drive(
-                       gamepad1.left_stick_x,
-                       gamepad1.left_stick_y,
-                       gamepad1.right_stick_x);
-
-
-       robot.driveTrain.setDriveVelocities(driveVelocities);
-       */
-
-        //Mecanum Drive Train ---- Test this out
-
-       /*
-       if (gamepad1.dpad_up) {
-           robot.linear_L.linear_motion_left.setPower(1);
-           robot.linear_R.linear_motion_right.setPower(0.95);
-       } else if (gamepad1.dpad_down) {
-           robot.linear_L.linear_motion_left.setPower(-1);
-           robot.linear_R.linear_motion_right.setPower(-0.95);
-
-       }
-       */
-
-
-        robot.lift.setVelocities(-gamepad2.left_stick_y * 0.50 * robot.lift.MAX_VEL);
+        //----------------------------------------------------------------------------------------------------------------------------------------
         robot.lift.doTelemetry(telemetry);
         telemetry.addData("Input val", -gamepad2.left_stick_y * 0.50 * robot.lift.MAX_VEL);
 
         robot.linear_C.linear_claw_Telemetry(telemetry);
+
+        telemetry.addData("left_slide_input", -gamepad2.left_stick_y * 0.50 * robot.lift.MAX_VEL);
+
         telemetry.update();
 
         double input_vel = gamepad2.right_stick_y * 0.75 * robot.linear_C.MAX_VEL;
 
+
+//        double left_slide_vel = -joystickY * 0.50 * robot.lift.MAX_VEL;
+//        double right_slide_vel = -joystickY * 0.50 * robot.lift.MAX_VEL;
+
+
         if (input_vel < 0 && robot.linear_C.linear_claw.getCurrentPosition() >= robot.linear_C.OUTER_BOUND
-        ||  input_vel > 0 && robot.linear_C.linear_claw.getCurrentPosition() <= robot.linear_C.INNER_BOUND){
+                || input_vel > 0 && robot.linear_C.linear_claw.getCurrentPosition() <= robot.linear_C.INNER_BOUND) {
             robot.linear_C.linear_claw.setVelocity(input_vel);
-        }
-        else{
+        } else {
             robot.linear_C.linear_claw.setVelocity(0);
         }
 
 
+        double joystickY = gamepad2.left_stick_y;
+        if (Math.abs(joystickY) < 0.05) { // Dead zone to ignore small inputs
+            joystickY = 0;
+            robot.lift.left_slide.setVelocity(0);  // Ensure motor stops
+            robot.lift.right_slide.setVelocity(0); // Ensure motor stops
+        } else {
+            double left_slide_vel = -joystickY * 0.50 * robot.lift.MAX_VEL;
+            double right_slide_vel = -joystickY * 0.50 * robot.lift.MAX_VEL;
 
-        robot.lift.left_slide.setPower(gamepad2.left_stick_y);
-        robot.lift.right_slide.setPower(gamepad2.left_stick_y);
+            // Set velocities only within bounds
+            if ((left_slide_vel > 0 && robot.lift.left_slide.getCurrentPosition() <= robot.lift.MAX_BOUNDS) ||
+                    (left_slide_vel < 0 && robot.lift.left_slide.getCurrentPosition() >= robot.lift.STARTING_BOUNDS)) {
+                robot.lift.left_slide.setVelocity(left_slide_vel);
+            } else {
+                robot.lift.left_slide.setVelocity(0); // Stop if out of bounds
+            }
+
+            if ((right_slide_vel > 0 && robot.lift.right_slide.getCurrentPosition() <= robot.lift.MAX_BOUNDS) ||
+                    (right_slide_vel < 0 && robot.lift.right_slide.getCurrentPosition() >= robot.lift.STARTING_BOUNDS)) {
+                robot.lift.right_slide.setVelocity(right_slide_vel);
+            } else {
+                robot.lift.right_slide.setVelocity(0); // Stop if out of bounds
+            }
+        }
 
 
-       if (gamepad2.left_bumper){
-           left_servo.setPosition(0.8);
-       }
+//        robot.lift.left_slide.setPower(gamepad2.left_stick_y);
+//        robot.lift.right_slide.setPower(gamepad2.left_stick_y);
 
+
+//       if (gamepad2.left_bumper){
+//           left_servo.setPosition(0.8);
+//       }
 
         if (gamepad2.a && !aPressedLast) {
             if (!taskInProgress) {
@@ -230,7 +250,7 @@ public class MecanumTeleOp extends OpMode {
         }
 
 // Reset the task using the right bumper
-        if (gamepad2.right_bumper && !lbPressedLast) {
+        if (gamepad2.dpad_up && !lbPressedLast) {
             specimen_grabber.setPosition(0.5);
             left_servo.setPosition(0.015);
             //claw_rot.setPosition(0.05);
@@ -238,9 +258,9 @@ public class MecanumTeleOp extends OpMode {
             taskInProgress = false;  // Allow task to restart
             taskStep = 0;  // Reset task step
         }
-        lbPressedLast = gamepad2.right_bumper;
+        lbPressedLast = gamepad2.dpad_up;
 
-        if (gamepad2.right_bumper && !lbPressedLast && !rightBumperTaskInProgress) {
+        if (gamepad2.dpad_up && !lbPressedLast && !rightBumperTaskInProgress) {
             // Start the task sequence only if it isn't already running
             rightBumperTaskInProgress = true;
             rightBumperTaskStep = 1;
@@ -251,14 +271,13 @@ public class MecanumTeleOp extends OpMode {
         aPressedLast = gamepad2.a;
 
 
-
-        if (gamepad2.x && !xPressedLast){
+        if (gamepad2.x && !xPressedLast) {
             spin = !spin;
             intake_servo.setPower(spin ? -1 : 0);
         }
         xPressedLast = gamepad2.x;
 
-        if (gamepad2.y && yPressedLast){
+        if (gamepad2.y && yPressedLast) {
             isSpecimen_grab_toggle = !isSpecimen_grab_toggle;
             specimen_grabber.setPosition(isSpecimen_grab_toggle ? 0.50 : 0.90);
         }
@@ -267,11 +286,10 @@ public class MecanumTeleOp extends OpMode {
 
         if (gamepad2.b && !bPressedLast) {
             lift_servo_toggled = !lift_servo_toggled;
-            claw_rot.setPosition(lift_servo_toggled ? 0.05: 1);
+            claw_rot.setPosition(lift_servo_toggled ? 0.05 : 1);
+            claw_yaw.setPosition(0.2);
         }
         bPressedLast = gamepad2.b;
-
-
 
 
         if (rightBumperTaskInProgress && rightBumperTimer.milliseconds() > SPECIMEN_DELAY_MS) {
@@ -303,22 +321,31 @@ public class MecanumTeleOp extends OpMode {
             rightBumperTimer.reset(); // Reset timer for the next step
         }
 
-        lbPressedLast = gamepad2.right_bumper;
+        lbPressedLast = gamepad2.dpad_up;
 
 
+        if (gamepad2.right_bumper) {
 
-    }
+            claw_yaw_pressed += 1;
+            claw_yaw.setPosition(0.2 + new_pos);
+        }
+
+        if (gamepad2.left_bumper) {
+            claw_yaw_pressed -= 1;
+            claw_yaw.setPosition(0.2 + new_pos);
+
+        }
 
 
-
-    //Method to move motor to designated position
-    public void encoder(int turnage, double power){
-        robot.linear_C.linear_claw.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        target = ticks/turnage;
-        robot.linear_C.linear_claw.setTargetPosition((int) target);
-        robot.linear_C.linear_claw.setPower(power);
-        robot.linear_C.linear_claw.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-
+//        //Method to move motor to designated position
+//        public void encoder ( int turnage, double power){
+//            robot.linear_C.linear_claw.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//            target = ticks / turnage;
+//            robot.linear_C.linear_claw.setTargetPosition((int) target);
+//            robot.linear_C.linear_claw.setPower(power);
+//            robot.linear_C.linear_claw.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//
+//
+//        }
     }
 }
