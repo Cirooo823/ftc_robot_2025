@@ -325,7 +325,6 @@ public class MecanumTeleOp extends OpMode {
 
 
         if (gamepad2.right_bumper) {
-
             claw_yaw_pressed += 1;
             claw_yaw.setPosition(0.2 + new_pos);
         }

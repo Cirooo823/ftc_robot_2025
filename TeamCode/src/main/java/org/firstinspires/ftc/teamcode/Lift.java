@@ -50,13 +50,44 @@ public class Lift {
         telemetry.addData("Left Slide Vel", left_slide.getVelocity());
     }
 
-//    public void loop(){
-//
-//    }
 
-    public void setVelocities(double velocity){
-        left_slide.setVelocity(velocity);
-        right_slide.setVelocity(velocity);
+
+    public void setVelocities(double velocity) {
+        // Set initial velocities, and check bounds before setting velocity
+        if (left_slide.getCurrentPosition() < MAX_BOUNDS) {
+            left_slide.setVelocity(velocity);
+        } else {
+            left_slide.setVelocity(0); // Stop if it reaches max bounds
+        }
+
+        if (right_slide.getCurrentPosition() < MAX_BOUNDS) {
+            right_slide.setVelocity(velocity);
+        } else {
+            right_slide.setVelocity(0); // Stop if it reaches max bounds
+        }
     }
 
+    // Method to move slides up with boundary checks
+    public void moveUp(double velocity) {
+        setVelocities(velocity);
+    }
+
+    // Method to move slides down
+    public void moveDown(double velocity) {
+        // Ensure slide doesn't go below starting bounds
+        if (left_slide.getCurrentPosition() > STARTING_BOUNDS) {
+            left_slide.setVelocity(-velocity);
+        } else {
+            left_slide.setVelocity(0);
+        }
+
+        if (right_slide.getCurrentPosition() > STARTING_BOUNDS) {
+            right_slide.setVelocity(-velocity);
+        } else {
+            right_slide.setVelocity(0);
+        }
+
+
+
+    }
 }
