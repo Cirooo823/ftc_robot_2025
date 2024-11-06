@@ -130,7 +130,7 @@ public class MecanumTeleOp extends OpMode {
 
 
         claw_rot.setPosition(1);
-        left_servo.setPosition(0.04);
+        left_servo.setPosition(0.065);
         specimen_grabber.setPosition(0.4);
         claw_yaw.setPosition(0.2);
 
@@ -311,12 +311,18 @@ public class MecanumTeleOp extends OpMode {
 
 
                 case 2:
-                    specimen_grabber.setPosition(servoToggled ? 0.93 : 0.5);  // Adjust position
+                    specimen_grabber.setPosition(servoToggled ? 0.93 : 0.5);  // Adjust position CHECK BOUNDS
                     taskStep++;  // Move to step 3
                     break;
 
 
                 case 3:
+                    
+                    taskStep++;  // Move to step 4
+                    break;
+
+
+                case 4:
                     left_servo.setPosition(servoToggled ? 0.5 : 0.01);  // Adjust servo
                     taskInProgress = false;  // End task
                     break;
@@ -366,7 +372,7 @@ public class MecanumTeleOp extends OpMode {
 
         if (gamepad2.y && yPressedLast) {
             isSpecimen_grab_toggle = !isSpecimen_grab_toggle;
-            specimen_grabber.setPosition(isSpecimen_grab_toggle ? 0.40 : 0.90);
+            specimen_grabber.setPosition(isSpecimen_grab_toggle ? 0.60 : 0.90);
         }
         yPressedLast = gamepad2.y;
 
