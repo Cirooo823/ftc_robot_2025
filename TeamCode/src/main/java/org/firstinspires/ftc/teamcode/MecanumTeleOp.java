@@ -35,6 +35,7 @@ public class MecanumTeleOp extends OpMode {
     public Servo left_servo;
     public CRServo intake_servo;
     public Servo claw_rot;
+    public Servo specimen_claw;
 
 
     public Servo claw_yaw;
@@ -56,6 +57,7 @@ public class MecanumTeleOp extends OpMode {
     private boolean xPressedLast = false;
     private boolean lbPressedLast = false;
     private boolean taskInProgress = false;
+    private boolean specimenClaw = false;
 
 
     private boolean isInOriginalPosition = true;
@@ -123,6 +125,7 @@ public class MecanumTeleOp extends OpMode {
         claw_rot = hardwareMap.get(Servo.class, "intake_lift");
         specimen_grabber = hardwareMap.get(Servo.class, "specimen_grabber");
         claw_yaw = hardwareMap.get(Servo.class, "claw_yaw");
+        specimen_claw = hardwareMap.get(Servo.class, "specimen_claw");
 
 
 
@@ -446,19 +449,8 @@ public class MecanumTeleOp extends OpMode {
 
 
         if (gamepad2.dpad_down) {
-            int currentPosition = robot.linear_C.linear_claw.getCurrentPosition();
-            int newPosition = currentPosition - 600; // Move down by 600 ticks
-
-
-            // Ensure we don't exceed bounds
-            if (newPosition >= robot.linear_C.OUTER_BOUND) {
-                robot.linear_C.linear_claw.setTargetPosition(newPosition);
-                robot.linear_C.linear_claw.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robot.linear_C.linear_claw.setVelocity(1400);
-            } else {
-                // Optionally stop the motor if it's out of bounds
-                robot.linear_C.linear_claw.setVelocity(0);
-            }
+            specimenClaw = !specimenClaw;
+            specimen_claw.setPosition(specimenClaw ? .4: 0.1);
         }
 
 
