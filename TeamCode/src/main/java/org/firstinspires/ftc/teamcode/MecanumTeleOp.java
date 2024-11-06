@@ -317,14 +317,18 @@ public class MecanumTeleOp extends OpMode {
 
 
                 case 3:
-                    
-                    taskStep++;  // Move to step 4
+                    int new_target = (robot.linear_C.linear_claw.getCurrentPosition() - 1000);
+                    robot.linear_C.linear_claw.setTargetPosition(new_target);
+                    robot.linear_C.linear_claw.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    robot.linear_C.linear_claw.setPower(-1);
+                    taskStep++;
                     break;
 
 
                 case 4:
-                    left_servo.setPosition(servoToggled ? 0.5 : 0.01);  // Adjust servo
+                    left_servo.setPosition(servoToggled ? 0.5 : 0.065);  // Adjust servo
                     taskInProgress = false;  // End task
+                    robot.linear_C.linear_claw.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     break;
 
 
@@ -339,7 +343,7 @@ public class MecanumTeleOp extends OpMode {
 // Reset the task using the right bumper
         if (gamepad2.dpad_up && !lbPressedLast) {
             specimen_grabber.setPosition(0.5);
-            left_servo.setPosition(0.015);
+            left_servo.setPosition(0.065);
             //claw_rot.setPosition(0.05);
 
 
@@ -398,13 +402,13 @@ public class MecanumTeleOp extends OpMode {
 
 
                 case 2:
-                    left_servo.setPosition(0.015); // Adjust left servo after delay
+                    left_servo.setPosition(0.065); // Adjust left servo after delay
                     rightBumperTaskStep++; // Move to step 3
                     break;
 
 
                 case 3:
-                    claw_rot.setPosition(0.05); // Final adjustment
+                    claw_rot.setPosition(0.3); // Final adjustment
                     rightBumperTaskStep = 0; // Reset step counter
                     break;
                 case 4:
