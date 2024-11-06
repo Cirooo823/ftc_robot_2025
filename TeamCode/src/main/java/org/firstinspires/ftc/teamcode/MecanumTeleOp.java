@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -10,8 +11,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
+
+
 @TeleOp(name="TeleOp Program", group="TeleOp")
 public class MecanumTeleOp extends OpMode {
+
+
 
 
     Robot robot = new Robot();
@@ -25,12 +30,17 @@ public class MecanumTeleOp extends OpMode {
     public DcMotorEx left_b;
 
 
+
+
     public Servo left_servo;
     public CRServo intake_servo;
     public Servo claw_rot;
 
+
     public Servo claw_yaw;
     public Servo specimen_grabber;
+
+
 
 
     private boolean servoToggled = false;
@@ -47,36 +57,51 @@ public class MecanumTeleOp extends OpMode {
     private boolean lbPressedLast = false;
     private boolean taskInProgress = false;
 
+
     private boolean isInOriginalPosition = true;
+
 
     private static final int SPECIMEN_DELAY_MS = 1000;
     private boolean rightBumperTaskInProgress = false;
     private int rightBumperTaskStep = 0; // Track the step in the bumper task
 
+
     public int claw_yaw_pressed = 0;
+
 
     private static final double SERVO_INCREMENT = 0.05;
     private static final double MIN_SERVO_POSITION = 0.0;
     private static final double MAX_SERVO_POSITION = 1.0;
+
 
     private boolean rightBumperPressedLast = false;
     private boolean leftBumperPressedLast = false;
 
 
 
-    public double new_pos = 0.02 * claw_yaw_pressed;
+
+
+
+    public double new_pos;
+
 
     private ElapsedTime rightBumperTimer = new ElapsedTime();
 
+
     private int taskStep = 0;  // Track which step of the task is executing
     private static final int TASK_DELAY_MS = 500;  // 200ms delay
+
 
     //Code to run ONCE after the driver hits INIT
     @Override
     public void init() {
 
 
+
+
         robot.init(hardwareMap);
+
+
 
 
         left_f = hardwareMap.get(DcMotorEx.class, "left_front");
@@ -85,8 +110,12 @@ public class MecanumTeleOp extends OpMode {
         right_b = hardwareMap.get(DcMotorEx.class, "right_back");
 
 
+
+
         right_f.setDirection(DcMotorSimple.Direction.REVERSE);
         right_b.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
 
 
         left_servo = hardwareMap.get(Servo.class, "left_servo");
@@ -97,21 +126,34 @@ public class MecanumTeleOp extends OpMode {
 
 
 
+
+
+
         claw_rot.setPosition(1);
-        left_servo.setPosition(0.015);
-        specimen_grabber.setPosition(0.5);
+        left_servo.setPosition(0.04);
+        specimen_grabber.setPosition(0.4);
         claw_yaw.setPosition(0.2);
 
 
+
+
+
+
+
+
     }
+
 
     //Code to run REPEATEDLY after the driver hits INIT
     @Override
     public void init_loop() {
 
 
+
+
         //telemetry.addData("linear_claw", robot.linear_C.linear_claw.getCurrentPosition());
         telemetry.addData("left_servo_position", left_servo.getPosition());
+
 
         telemetry.addData("left_front", left_f.getCurrentPosition());
         telemetry.addData("right_front", right_f.getCurrentPosition());
@@ -120,9 +162,15 @@ public class MecanumTeleOp extends OpMode {
 
 
 
+
+
+
         telemetry.update();
 
+
     }
+
+
 
 
     //Code to run ONCE after the driver hits PLAY
@@ -130,12 +178,18 @@ public class MecanumTeleOp extends OpMode {
     public void start() {
 
 
+
+
     }
+
+
 
 
     //Code to run REPEATEDLY after the driver hits PLAY
     @Override
     public void loop() {
+
+
 
 
         double x = -gamepad1.right_stick_x;
@@ -144,10 +198,15 @@ public class MecanumTeleOp extends OpMode {
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
 
+
+
         //Hardware needs to change motors for increased speed.
 
 
+
+
         double drivePowerScale = gamepad1.right_bumper ? 0.5 : 1.0;
+
 
         // Apply scaled power to drivetrain motors
         right_f.setPower(((y + x + rx) / denominator) * drivePowerScale);
@@ -158,17 +217,25 @@ public class MecanumTeleOp extends OpMode {
         robot.lift.doTelemetry(telemetry);
         telemetry.addData("Input val", -gamepad2.left_stick_y * 0.50 * robot.lift.MAX_VEL);
 
+
         robot.linear_C.linear_claw_Telemetry(telemetry);
+
 
         telemetry.addData("left_slide_input", -gamepad2.left_stick_y * 0.50 * robot.lift.MAX_VEL);
 
+
         telemetry.update();
+
 
         double input_vel = gamepad2.right_stick_y * 0.75 * robot.linear_C.MAX_VEL;
 
 
+
+
 //        double left_slide_vel = -joystickY * 0.50 * robot.lift.MAX_VEL;
 //        double right_slide_vel = -joystickY * 0.50 * robot.lift.MAX_VEL;
+
+
 
 
         if (input_vel < 0 && robot.linear_C.linear_claw.getCurrentPosition() >= robot.linear_C.OUTER_BOUND
@@ -179,14 +246,17 @@ public class MecanumTeleOp extends OpMode {
         }
 
 
+
+
         double joystickY = gamepad2.left_stick_y;
         if (Math.abs(joystickY) < 0.05) { // Dead zone to ignore small inputs
             joystickY = 0;
-            robot.lift.left_slide.setVelocity(0);  // Ensure motor stops
-            robot.lift.right_slide.setVelocity(0); // Ensure motor stops
+            robot.lift.left_slide.setVelocity(0);
+            robot.lift.right_slide.setVelocity(0);
         } else {
-            double left_slide_vel = -joystickY * 0.50 * robot.lift.MAX_VEL;
-            double right_slide_vel = -joystickY * 0.50 * robot.lift.MAX_VEL;
+            double left_slide_vel = -joystickY * 1 * robot.lift.MAX_VEL;
+            double right_slide_vel = -joystickY * 1 * robot.lift.MAX_VEL;
+
 
             // Set velocities only within bounds
             if ((left_slide_vel > 0 && robot.lift.left_slide.getCurrentPosition() <= robot.lift.MAX_BOUNDS) ||
@@ -195,6 +265,7 @@ public class MecanumTeleOp extends OpMode {
             } else {
                 robot.lift.left_slide.setVelocity(0); // Stop if out of bounds
             }
+
 
             if ((right_slide_vel > 0 && robot.lift.right_slide.getCurrentPosition() <= robot.lift.MAX_BOUNDS) ||
                     (right_slide_vel < 0 && robot.lift.right_slide.getCurrentPosition() >= robot.lift.STARTING_BOUNDS)) {
@@ -205,13 +276,18 @@ public class MecanumTeleOp extends OpMode {
         }
 
 
+
+
 //        robot.lift.left_slide.setPower(gamepad2.left_stick_y);
 //        robot.lift.right_slide.setPower(gamepad2.left_stick_y);
+
+
 
 
 //       if (gamepad2.left_bumper){
 //           left_servo.setPosition(0.8);
 //       }
+
 
         if (gamepad2.a && !aPressedLast) {
             if (!taskInProgress) {
@@ -223,6 +299,7 @@ public class MecanumTeleOp extends OpMode {
             }
         }
 
+
 // Task sequence management with non-blocking delays
         if (taskInProgress && timer.milliseconds() > TASK_DELAY_MS) {
             switch (taskStep) {
@@ -232,15 +309,18 @@ public class MecanumTeleOp extends OpMode {
                     taskStep++;  // Move to step 2
                     break;
 
+
                 case 2:
                     specimen_grabber.setPosition(servoToggled ? 0.93 : 0.5);  // Adjust position
                     taskStep++;  // Move to step 3
                     break;
 
+
                 case 3:
                     left_servo.setPosition(servoToggled ? 0.5 : 0.01);  // Adjust servo
                     taskInProgress = false;  // End task
                     break;
+
 
                 default:
                     taskInProgress = false;  // Safety fallback
@@ -249,16 +329,19 @@ public class MecanumTeleOp extends OpMode {
             timer.reset();  // Reset timer for the next step
         }
 
+
 // Reset the task using the right bumper
         if (gamepad2.dpad_up && !lbPressedLast) {
             specimen_grabber.setPosition(0.5);
             left_servo.setPosition(0.015);
             //claw_rot.setPosition(0.05);
 
+
             taskInProgress = false;  // Allow task to restart
             taskStep = 0;  // Reset task step
         }
         lbPressedLast = gamepad2.dpad_up;
+
 
         if (gamepad2.dpad_up && !lbPressedLast && !rightBumperTaskInProgress) {
             // Start the task sequence only if it isn't already running
@@ -267,8 +350,11 @@ public class MecanumTeleOp extends OpMode {
             rightBumperTimer.reset();
         }
 
+
 // Update button state
         aPressedLast = gamepad2.a;
+
+
 
 
         if (gamepad2.x && !xPressedLast) {
@@ -277,19 +363,24 @@ public class MecanumTeleOp extends OpMode {
         }
         xPressedLast = gamepad2.x;
 
+
         if (gamepad2.y && yPressedLast) {
             isSpecimen_grab_toggle = !isSpecimen_grab_toggle;
-            specimen_grabber.setPosition(isSpecimen_grab_toggle ? 0.50 : 0.90);
+            specimen_grabber.setPosition(isSpecimen_grab_toggle ? 0.40 : 0.90);
         }
         yPressedLast = gamepad2.y;
 
 
+
+
         if (gamepad2.b && !bPressedLast) {
             lift_servo_toggled = !lift_servo_toggled;
-            claw_rot.setPosition(lift_servo_toggled ? 0.05 : 1);
+            claw_rot.setPosition(lift_servo_toggled ? 0.3 : 1);
             claw_yaw.setPosition(0.2);
         }
         bPressedLast = gamepad2.b;
+
+
 
 
         if (rightBumperTaskInProgress && rightBumperTimer.milliseconds() > SPECIMEN_DELAY_MS) {
@@ -299,10 +390,12 @@ public class MecanumTeleOp extends OpMode {
                     rightBumperTaskStep++; // Move to step 2
                     break;
 
+
                 case 2:
                     left_servo.setPosition(0.015); // Adjust left servo after delay
                     rightBumperTaskStep++; // Move to step 3
                     break;
+
 
                 case 3:
                     claw_rot.setPosition(0.05); // Final adjustment
@@ -314,6 +407,7 @@ public class MecanumTeleOp extends OpMode {
                     taskInProgress = false; // Allow other tasks to start
                     break;
 
+
                 default:
                     rightBumperTaskInProgress = false; // Safety fallback
                     break;
@@ -321,18 +415,40 @@ public class MecanumTeleOp extends OpMode {
             rightBumperTimer.reset(); // Reset timer for the next step
         }
 
+
         lbPressedLast = gamepad2.dpad_up;
+
+
 
 
         if (gamepad2.right_bumper) {
             claw_yaw_pressed += 1;
+            new_pos = 0.02 * claw_yaw_pressed;
             claw_yaw.setPosition(0.2 + new_pos);
         }
 
+
         if (gamepad2.left_bumper) {
             claw_yaw_pressed -= 1;
+            new_pos = 0.02 * claw_yaw_pressed;
             claw_yaw.setPosition(0.2 + new_pos);
+        }
 
+
+        if (gamepad2.dpad_down) {
+            int currentPosition = robot.linear_C.linear_claw.getCurrentPosition();
+            int newPosition = currentPosition - 600; // Move down by 600 ticks
+
+
+            // Ensure we don't exceed bounds
+            if (newPosition >= robot.linear_C.OUTER_BOUND) {
+                robot.linear_C.linear_claw.setTargetPosition(newPosition);
+                robot.linear_C.linear_claw.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robot.linear_C.linear_claw.setVelocity(1400);
+            } else {
+                // Optionally stop the motor if it's out of bounds
+                robot.linear_C.linear_claw.setVelocity(0);
+            }
         }
 
 
@@ -348,3 +464,6 @@ public class MecanumTeleOp extends OpMode {
 //        }
     }
 }
+
+
+
