@@ -10,13 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-
-
-
 @TeleOp(name="TeleOp Program", group="TeleOp")
 public class MecanumTeleOp extends OpMode {
-
-
 
 
     Robot robot = new Robot();
@@ -58,6 +53,8 @@ public class MecanumTeleOp extends OpMode {
     private boolean lbPressedLast = false;
     private boolean taskInProgress = false;
     private boolean specimenClaw = false;
+    private boolean dpadDownPressedLast = false;
+
 
 
     private boolean isInOriginalPosition = true;
@@ -80,15 +77,9 @@ public class MecanumTeleOp extends OpMode {
     private boolean leftBumperPressedLast = false;
 
 
-
-
-
-
     public double new_pos;
 
-
     private ElapsedTime rightBumperTimer = new ElapsedTime();
-
 
     private int taskStep = 0;  // Track which step of the task is executing
     private static final int TASK_DELAY_MS = 500;  // 200ms delay
@@ -98,27 +89,16 @@ public class MecanumTeleOp extends OpMode {
     @Override
     public void init() {
 
-
-
-
         robot.init(hardwareMap);
-
-
-
 
         left_f = hardwareMap.get(DcMotorEx.class, "left_front");
         right_f = hardwareMap.get(DcMotorEx.class, "right_front");
         left_b = hardwareMap.get(DcMotorEx.class, "left_back");
         right_b = hardwareMap.get(DcMotorEx.class, "right_back");
 
-
-
-
         right_f.setDirection(DcMotorSimple.Direction.REVERSE);
+        left_b.setDirection(DcMotorSimple.Direction.REVERSE);
         right_b.setDirection(DcMotorSimple.Direction.REVERSE);
-
-
-
 
         left_servo = hardwareMap.get(Servo.class, "left_servo");
         intake_servo = hardwareMap.get(CRServo.class, "intake_servo");
@@ -129,20 +109,11 @@ public class MecanumTeleOp extends OpMode {
 
 
 
-
-
-
         claw_rot.setPosition(1);
         left_servo.setPosition(0.065);
         specimen_grabber.setPosition(0.4);
         claw_yaw.setPosition(0.2);
-
-
-
-
-
-
-
+        specimen_claw.setPosition(1);
 
     }
 
@@ -150,9 +121,6 @@ public class MecanumTeleOp extends OpMode {
     //Code to run REPEATEDLY after the driver hits INIT
     @Override
     public void init_loop() {
-
-
-
 
         //telemetry.addData("linear_claw", robot.linear_C.linear_claw.getCurrentPosition());
         telemetry.addData("left_servo_position", left_servo.getPosition());
@@ -163,25 +131,15 @@ public class MecanumTeleOp extends OpMode {
         telemetry.addData("left_back", left_b.getCurrentPosition());
         telemetry.addData("right_back", right_b.getCurrentPosition());
 
-
-
-
-
-
         telemetry.update();
 
 
     }
 
 
-
-
     //Code to run ONCE after the driver hits PLAY
     @Override
     public void start() {
-
-
-
 
     }
 
@@ -192,25 +150,15 @@ public class MecanumTeleOp extends OpMode {
     @Override
     public void loop() {
 
-
-
-
         double x = -gamepad1.right_stick_x;
-        double y = -gamepad1.left_stick_y;
+        double y =  -gamepad1.left_stick_y;
         double rx = -gamepad1.left_stick_x;
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
-
-
-
         //Hardware needs to change motors for increased speed.
-
-
-
-
         double drivePowerScale = gamepad1.right_bumper ? 0.5 : 1.0;
 
-
+    
         // Apply scaled power to drivetrain motors
         right_f.setPower(((y + x + rx) / denominator) * drivePowerScale);
         left_b.setPower(((y - x + rx) / denominator) * drivePowerScale);
@@ -249,8 +197,6 @@ public class MecanumTeleOp extends OpMode {
         }
 
 
-
-
         double joystickY = gamepad2.left_stick_y;
         if (Math.abs(joystickY) < 0.05) { // Dead zone to ignore small inputs
             joystickY = 0;
@@ -277,20 +223,6 @@ public class MecanumTeleOp extends OpMode {
                 robot.lift.right_slide.setVelocity(0); // Stop if out of bounds
             }
         }
-
-
-
-
-//        robot.lift.left_slide.setPower(gamepad2.left_stick_y);
-//        robot.lift.right_slide.setPower(gamepad2.left_stick_y);
-
-
-
-
-//       if (gamepad2.left_bumper){
-//           left_servo.setPosition(0.8);
-//       }
-
 
         if (gamepad2.a && !aPressedLast) {
             if (!taskInProgress) {
@@ -329,7 +261,7 @@ public class MecanumTeleOp extends OpMode {
 
 
                 case 4:
-                    left_servo.setPosition(servoToggled ? 0.5 : 0.065);  // Adjust servo
+                    left_servo.setPosition(servoToggled ? 0.55 : 0.065);  // Adjust servo
                     taskInProgress = false;  // End task
                     robot.linear_C.linear_claw.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     break;
@@ -377,12 +309,11 @@ public class MecanumTeleOp extends OpMode {
         xPressedLast = gamepad2.x;
 
 
-        if (gamepad2.y && yPressedLast) {
+        if (gamepad2.y && !yPressedLast) {  // Toggle only on the initial press
             isSpecimen_grab_toggle = !isSpecimen_grab_toggle;
             specimen_grabber.setPosition(isSpecimen_grab_toggle ? 0.60 : 0.90);
         }
-        yPressedLast = gamepad2.y;
-
+        yPressedLast = gamepad2.y;  // Update last pressed state outside the condition
 
 
 
@@ -438,20 +369,19 @@ public class MecanumTeleOp extends OpMode {
             claw_yaw_pressed += 1;
             new_pos = 0.02 * claw_yaw_pressed;
             claw_yaw.setPosition(0.2 + new_pos);
-        }
-
-
-        if (gamepad2.left_bumper) {
+        } else if (gamepad2.left_bumper) {
             claw_yaw_pressed -= 1;
             new_pos = 0.02 * claw_yaw_pressed;
             claw_yaw.setPosition(0.2 + new_pos);
         }
 
 
-        if (gamepad2.dpad_down) {
+        if (gamepad2.dpad_down && !dpadDownPressedLast) {
             specimenClaw = !specimenClaw;
-            specimen_claw.setPosition(specimenClaw ? .4: 0.1);
+            specimen_claw.setPosition(specimenClaw ? 0.64 : 1);
         }
+        dpadDownPressedLast = gamepad2.dpad_down;
+
 
 
 //        //Method to move motor to designated position
