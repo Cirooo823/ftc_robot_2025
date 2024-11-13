@@ -17,7 +17,7 @@ public class LinearClaw {
     public final double MAX_VEL = 312/60 * TICKS_PER_REV;
 
     public final int OUTER_BOUND = -2100;
-    public final int INNER_BOUND = 0;
+    public final int INNER_BOUND = 100;
 
     public void init(HardwareMap ahwMap) {
         hardwareMap = ahwMap;
