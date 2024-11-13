@@ -97,7 +97,7 @@ public class MecanumTeleOp extends OpMode {
         right_b = hardwareMap.get(DcMotorEx.class, "right_back");
 
         right_f.setDirection(DcMotorSimple.Direction.REVERSE);
-        left_b.setDirection(DcMotorSimple.Direction.REVERSE);
+        //left_b.setDirection(DcMotorSimple.Direction.REVERSE);
         right_b.setDirection(DcMotorSimple.Direction.REVERSE);
 
         left_servo = hardwareMap.get(Servo.class, "left_servo");
@@ -110,7 +110,7 @@ public class MecanumTeleOp extends OpMode {
 
 
         claw_rot.setPosition(1);
-        left_servo.setPosition(0.065);
+        left_servo.setPosition(0.11);
         specimen_grabber.setPosition(0.4);
         claw_yaw.setPosition(0.2);
         specimen_claw.setPosition(1);
@@ -150,7 +150,7 @@ public class MecanumTeleOp extends OpMode {
     @Override
     public void loop() {
 
-        double x = -gamepad1.right_stick_x;
+        double x =  -gamepad1.right_stick_x;
         double y =  -gamepad1.left_stick_y;
         double rx = -gamepad1.left_stick_x;
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
@@ -158,7 +158,7 @@ public class MecanumTeleOp extends OpMode {
         //Hardware needs to change motors for increased speed.
         double drivePowerScale = gamepad1.right_bumper ? 0.5 : 1.0;
 
-    
+
         // Apply scaled power to drivetrain motors
         right_f.setPower(((y + x + rx) / denominator) * drivePowerScale);
         left_b.setPower(((y - x + rx) / denominator) * drivePowerScale);
@@ -278,7 +278,7 @@ public class MecanumTeleOp extends OpMode {
 // Reset the task using the right bumper
         if (gamepad2.dpad_up && !lbPressedLast) {
             specimen_grabber.setPosition(0.5);
-            left_servo.setPosition(0.065);
+            left_servo.setPosition(0.11);
             //claw_rot.setPosition(0.05);
 
 
@@ -311,7 +311,7 @@ public class MecanumTeleOp extends OpMode {
 
         if (gamepad2.y && !yPressedLast) {  // Toggle only on the initial press
             isSpecimen_grab_toggle = !isSpecimen_grab_toggle;
-            specimen_grabber.setPosition(isSpecimen_grab_toggle ? 0.60 : 0.90);
+            specimen_grabber.setPosition(isSpecimen_grab_toggle ? 1 : 0); //was 0.6 to 0.9
         }
         yPressedLast = gamepad2.y;  // Update last pressed state outside the condition
 
@@ -378,7 +378,7 @@ public class MecanumTeleOp extends OpMode {
 
         if (gamepad2.dpad_down && !dpadDownPressedLast) {
             specimenClaw = !specimenClaw;
-            specimen_claw.setPosition(specimenClaw ? 0.64 : 1);
+            specimen_claw.setPosition(specimenClaw ? 1 : 0);
         }
         dpadDownPressedLast = gamepad2.dpad_down;
 
@@ -396,6 +396,5 @@ public class MecanumTeleOp extends OpMode {
 //        }
     }
 }
-
 
 
