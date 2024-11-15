@@ -15,7 +15,7 @@ public class Lift {
     public final double TICKS_PER_REV = 537.7;
     public final double MAX_VEL = 312/60 * TICKS_PER_REV;
 
-    public final int MAX_BOUNDS = 3200;
+    public final int MAX_BOUNDS = 2200;
     public final int STARTING_BOUNDS = 0;
 
     HardwareMap hardwareMap;

@@ -104,10 +104,11 @@ public class MecanumTeleOp extends OpMode {
 
 
         claw_rot.setPosition(1);
-        left_servo.setPosition(0.09);
+        left_servo.setPosition(0.1);
         sample_grabber.setPosition(0.4);
         claw_yaw.setPosition(0.2);
-        specimen_claw.setPosition(1);
+        specimen_claw.setPosition(0.8);
+
 
     }
 
@@ -149,7 +150,7 @@ public class MecanumTeleOp extends OpMode {
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
         //Hardware needs to change motors for increased speed.
-        double drivePowerScale = gamepad1.right_bumper ? 0.2 : 1.0;
+        double drivePowerScale = gamepad1.right_bumper ? 0.4 : 1.0;
 
 
         // Apply scaled power to drivetrain motors
@@ -270,7 +271,7 @@ public class MecanumTeleOp extends OpMode {
 // Reset the task using the right bumper
         if (gamepad2.dpad_up && !lbPressedLast) {
             sample_grabber.setPosition(0.5);
-            left_servo.setPosition(0.09);
+            left_servo.setPosition(0.1);
             //claw_rot.setPosition(0.05);
             intake_servo.setPower(-1);
 
@@ -302,14 +303,14 @@ public class MecanumTeleOp extends OpMode {
 
         if (gamepad2.y && !yPressedLast) {  // Toggle only on the initial press
             isSpecimen_grab_toggle = !isSpecimen_grab_toggle;
-            sample_grabber.setPosition(isSpecimen_grab_toggle ? 0.6 : 0.9); //was 0.6 to 0.9
+            sample_grabber.setPosition(isSpecimen_grab_toggle ? 0.4 : 0.9); //was 0.6 to 0.9
         }
         yPressedLast = gamepad2.y;  // Update last pressed state outside the condition
 
 
         if (gamepad2.right_stick_button && !bPressedLast) {
             lift_servo_toggled = !lift_servo_toggled;
-            claw_rot.setPosition(lift_servo_toggled ? 0.3 : 1);
+            claw_rot.setPosition(lift_servo_toggled ? 0.32 : 1);
             claw_yaw.setPosition(0.2);
         }
         bPressedLast = gamepad2.right_stick_button;
@@ -364,7 +365,7 @@ public class MecanumTeleOp extends OpMode {
 
         if (gamepad2.dpad_down && !dpadDownPressedLast) {
             specimenClaw = !specimenClaw;
-            specimen_claw.setPosition(specimenClaw ? 0.65 : 1); //lower the values more it closes
+            specimen_claw.setPosition(specimenClaw ? 0.65 : 0.8); //lower the values more it closes
         }
         dpadDownPressedLast = gamepad2.dpad_down;
 
